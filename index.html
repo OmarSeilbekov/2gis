@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивный Скрипт 2ГИС | CRM Professional v4.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Интерактивный Скрипт 2ГИС | TMA Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --primary: #2bae33; /* Зеленый 2ГИС */
@@ -13,68 +13,64 @@
             --bg: #f4f6f9;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 10px;
+            padding: 12px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
             overflow-x: hidden;
         }
 
-        /* КНОПКА-БУРГЕР (ТРИ ПОЛОСКИ) */
-        .burger-menu-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #ffffff;
-            border: none;
-            box-shadow: var(--shadow);
-            border-radius: 12px;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            transition: background 0.2s;
+        /* КНОПКА АРХИВА - ТЕПЕРЬ ВСТРОЕННАЯ И АККУРАТНАЯ */
+        .archive-inline-link {
+            width: 100%;
+            text-align: right;
+            margin-bottom: 10px;
+            padding-right: 5px;
+            box-sizing: border-box;
         }
-
-        .burger-menu-btn:hover { background: #f8fafc; }
-        .burger-menu-btn span {
-            display: block;
-            width: 25px;
-            height: 3px;
-            background: var(--text-main);
-            border-radius: 2px;
-            transition: 0.3s;
+        .archive-inline-link button {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .archive-inline-link button:active {
+            background: rgba(0, 165, 255, 0.1);
         }
 
         /* ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ ИСТОРИИ */
         .drawer {
             position: fixed;
             top: 0;
-            left: -360px;
-            width: 360px;
+            left: -100%;
+            width: 85%;
+            max-width: 320px;
             height: 100vh;
             background: #ffffff;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.1);
-            z-index: 999;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 80px 25px 30px 25px;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.15);
+            z-index: 1999;
+            transition: left 0.25s ease-out;
+            padding: 30px 20px 20px 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
         }
-
         .drawer.open { left: 0; }
         .drawer-overlay {
             position: fixed;
@@ -82,20 +78,32 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(15, 23, 42, 0.3);
-            z-index: 998;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 1998;
             display: none;
         }
         .drawer-overlay.open { display: block; }
 
         .drawer-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             text-transform: uppercase;
             color: #0f172a;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .drawer-close {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+            cursor: pointer;
         }
 
         .history-list {
@@ -103,27 +111,20 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
-
         .history-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .history-card:hover {
-            border-color: var(--secondary);
-            background: #f0f9ff;
-        }
-
-        .history-card .card-name { font-weight: 700; font-size: 0.95rem; color: #0f172a; }
+        .history-card .card-name { font-weight: 700; font-size: 0.9rem; color: #0f172a; }
         .history-card .card-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
 
-        /* ОТДЕЛЬНАЯ СТРАНИЦА КАРТОЧКИ (FULLSCREEN OVERLAY) */
+        /* ОТДЕЛЬНАЯ ПОЛНОЭКРАННАЯ СТРАНИЦА КАРТОЧКИ КЛИЕНТА */
         .fullscreen-page {
             position: fixed;
             top: 0;
@@ -133,159 +134,350 @@
             background: var(--bg);
             z-index: 2000;
             display: none;
-            padding: 40px 20px;
+            padding: 15px;
             box-sizing: border-box;
             overflow-y: auto;
         }
         .fullscreen-container {
-            max-width: 800px;
-            margin: 0 auto;
+            width: 100%;
             background: #ffffff;
-            border-radius: 20px;
-            padding: 35px;
+            border-radius: 16px;
+            padding: 20px;
             box-shadow: var(--shadow);
+            box-sizing: border-box;
         }
 
-        /* ЦЕНТРАЛЬНЫЙ БЛОК СКРИПТА */
+        /* ГЛАВНЫЙ ИНТЕРФЕЙС */
         .main-content {
             width: 100%;
-            max-width: 100%;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
             align-items: center;
             box-sizing: border-box;
         }
 
-        /* ШКАЛА ПРОГРЕССА */
+        /* КЛИКАБЕЛЬНЫЙ ПРОГРЕСС-БАР */
         .progress-container {
             width: 100%;
             background: #ffffff;
-            padding: 15px 20px;
+            padding: 12px 15px;
             border-radius: 12px;
             box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             box-sizing: border-box;
         }
-
         .progress-bar { display: flex; justify-content: space-between; position: relative; }
         .progress-bar::before {
             content: ''; position: absolute; top: 50%; left: 0; transform: translateY(-50%);
-            height: 4px; width: 100%; background: #e2e8f0; z-index: 1;
+            height: 3px; width: 100%; background: #e2e8f0; z-index: 1;
         }
-
         .progress-line {
             position: absolute; top: 50%; left: 0; transform: translateY(-50%);
-            height: 4px; width: 0%; background: var(--primary); z-index: 2; transition: width 0.3s;
+            height: 3px; width: 0%; background: var(--primary); z-index: 2; transition: width 0.25s;
         }
-
         .progress-step {
-            position: relative; z-index: 3; background: #ffffff; border: 3px solid #e2e8f0;
-            color: var(--text-muted); width: 32px; height: 32px; border-radius: 50%;
+            position: relative; z-index: 3; background: #ffffff; border: 2px solid #e2e8f0;
+            color: var(--text-muted); width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; font-weight: 700;
-            font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+            font-size: 0.8rem; cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
-
-        .progress-step.active { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 10px rgba(43, 174, 51, 0.2); }
+        .progress-step.active { border-color: var(--primary); color: var(--primary); }
         .progress-step.completed { border-color: var(--primary); background: var(--primary); color: #ffffff; }
 
-        .progress-labels { display: flex; justify-content: space-between; margin-top: 8px; }
-        .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); width: 75px; text-align: center; cursor: pointer; }
+        .progress-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+        .progress-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); width: 60px; text-align: center; }
         .progress-label.active { color: #0f172a; font-weight: 700; }
 
         /* КОНТЕЙНЕР СКРИПТА */
         .script-container {
             width: 100%;
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
             padding: 20px 15px;
             box-sizing: border-box;
         }
 
-        .step { display: none; animation: fadeIn 0.3s ease forwards; }
+        .step { display: none; }
         .step.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        .badge { display: inline-block; padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
         .badge-start { background: #e2f5e3; color: var(--primary-dark); }
         .badge-sec { background: #fff3e0; color: #b78103; }
         .badge-lpr { background: #e3f2fd; color: #0d47a1; }
         .badge-final { background: #fce4ec; color: #c2185b; }
 
-        h2 { font-size: 1.4rem; margin: 0 0 20px 0; color: #0f172a; }
+        h2 { font-size: 1.2rem; margin: 0 0 15px 0; color: #0f172a; line-height: 1.4; }
 
         .phrase-box {
-            background-color: #f8fafc; border-left: 4px solid var(--primary); padding: 20px;
-            border-radius: 0 12px 12px 0; font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px; color: #334155;
+            background-color: #f8fafc; border-left: 4px solid var(--primary); padding: 15px;
+            border-radius: 0 10px 10px 0; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; color: #334155;
+            -webkit-user-select: text; user-select: text;
         }
         .phrase-box.lpr-border { border-left-color: var(--secondary); }
         .phrase-box.final-border { border-left-color: #e91e63; }
 
-        .notebook-box { background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
-        .notebook-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 12px; }
+        .notebook-box { background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        .notebook-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 10px; }
 
         .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 5px; }
-        .input-field { width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none; transition: border 0.2s; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+        
+        .input-field {
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; 
+            font-size: 0.95rem; box-sizing: border-box; outline: none; background: #ffffff;
+            -webkit-appearance: none;
+        }
         .input-field:focus { border-color: var(--secondary); }
 
-        /* CRM ЯЧЕЙКИ */
-        .crm-split-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .crm-row { display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 10px; gap: 15px; }
-        .crm-row-info { font-size: 0.95rem; color: #334155; flex-grow: 1; }
-        .crm-row-info strong { color: #64748b; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        /* CRM СЕТКА */
+        .crm-split-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .crm-row { display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 10px; gap: 10px; }
+        .crm-row-info { font-size: 0.9rem; color: #334155; flex-grow: 1; min-width: 0; }
+        .crm-row-info strong { color: #64748b; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 2px; }
         
-        /* КНОПКИ-ИКОНКИ ДЛЯ РЕДАКТИРОВАНИЯ И КОПИРОВАНИЯ */
-        .action-actions-wrap { display: flex; gap: 8px; }
+        /* Бледный текст по умолчанию, если ничего не заполнено */
+        .crm-row-info span.placeholder-active { color: #cbd5e1; font-style: italic; }
+        .crm-row-info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .action-actions-wrap { display: flex; gap: 6px; flex-shrink: 0; }
+        
         .icon-btn {
-            background: #f1f5f9; border: none; width: 38px; height: 38px; border-radius: 8px;
+            background: #f1f5f9; border: none; width: 42px; height: 42px; border-radius: 8px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; transition: all 0.15s;
+            font-size: 1.1rem; -webkit-tap-highlight-color: transparent;
         }
-        .icon-btn:hover { background: #e2e8f0; transform: scale(1.05); }
         .icon-btn.save-active { background: #dcfce7; color: var(--primary-dark); }
 
-        .copy-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 12px; color: #334155; }
-        .btn-copy { background: #e2e8f0; border: none; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; color: #475569; }
-        .btn-copy:hover { background: #cbd5e1; }
+        .copy-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 10px; color: #334155; overflow-x: auto; -webkit-user-select: text; user-select: text; }
+        .btn-copy { width: 100%; background: #e2e8f0; border: none; padding: 12px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; color: #475569; -webkit-tap-highlight-color: transparent; }
 
-        .options-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
-        .buttons-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        @media(min-width: 600px) { .buttons-grid { grid-template-columns: 1fr 1fr; } }
+        .options-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+        .buttons-grid { display: flex; flex-direction: column; gap: 8px; }
 
         .btn {
-            background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px;
-            font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s;
-            color: #475569; display: flex; align-items: center; justify-content: space-between;
+            background: #ffffff; border: 2px solid #e2e8f0; border-radius: 10px; padding: 14px;
+            font-size: 0.9rem; font-weight: 600; text-align: left; cursor: pointer; color: #475569;
+            display: flex; align-items: center; justify-content: space-between; -webkit-tap-highlight-color: transparent;
+            line-height: 1.3;
         }
-        .btn:hover { border-color: var(--primary); color: var(--primary-dark); background: #f0fdf4; transform: translateY(-1px); }
-        .btn.btn-danger:hover { border-color: #ef4444; color: #b91c1c; background: #fef2f2; }
+        .btn:hover, .btn:active { border-color: var(--primary); background: #f0fdf4; }
+        .btn.btn-danger:hover, .btn.btn-danger:active { border-color: #ef4444; background: #fef2f2; }
         
-        .btn-back { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.85rem; margin-bottom: 20px; padding: 0; }
-        .btn-clear-history { background: #fef2f2; color: #ef4444; border: 1px dashed #fca5a5; padding: 10px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        .btn-clear-history { width: 100%; background: #fef2f2; color: #ef4444; border: 1px dashed #fca5a5; padding: 12px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <button class="burger-menu-btn" onclick="toggleDrawer()">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+    <div class="main-content">
+        
+        <div class="archive-inline-link">
+            <button onclick="toggleDrawer()">📜 Открыть архив звонков</button>
+        </div>
 
-    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-line" id="p-line"></div>
+                <div class="progress-step active" id="ps1" onclick="jumpToStep('step-start')">1</div>
+                <div class="progress-step" id="ps2" onclick="jumpToStep('step-sec-reason')">2</div>
+                <div class="progress-step" id="ps3" onclick="jumpToStep('step-lpr-welcome')">3</div>
+                <div class="progress-step" id="ps4" onclick="jumpToStep('step-lpr-qualification')">4</div>
+                <div class="progress-step" id="ps5" onclick="jumpToStep('step-final-close')">5</div>
+            </div>
+            <div class="progress-labels">
+                <div class="progress-label active" id="pl1">Приветствие</div>
+                <div class="progress-label" id="pl2">Секретарь</div>
+                <div class="progress-label" id="pl3">ЛПР</div>
+                <div class="progress-label" id="pl4">Разведка</div>
+                <div class="progress-label" id="pl5">Закрытие</div>
+            </div>
+        </div>
+
+        <div class="script-container">
+
+            <div id="step-start" class="step active" data-progress="1">
+                <span class="badge badge-start">Этап 1: Приветствие</span>
+                <h2>Выход на контакт (Секретарь)</h2>
+                
+                <div class="notebook-box" style="border-color: var(--primary);">
+                    <div class="notebook-title" style="color: var(--primary-dark)">🏢 Зафиксируйте компанию</div>
+                    <div class="input-group">
+                        <input type="text" id="comp-name" class="input-field" placeholder="Название компании..." oninput="capitalizeInput(this); saveCurrentCall();">
+                    </div>
+                </div>
+
+                <div class="phrase-box">«Добрый день! Компания 2ГИС, меня зовут [Имя]. Соедините, пожалуйста, с руководителем компании или ответственным за привлечение клиентов».</div>
+                <div class="options-title">Что отвечает секретарь?</div>
+                <div class="buttons-grid">
+                    <button class="btn" onclick="goTo('step-lpr-welcome')">Сразу переключает на ЛПР</button>
+                    <button class="btn" onclick="goTo('step-sec-reason')">«По какому вопросу?»</button>
+                    <button class="btn" onclick="goTo('step-sec-not-interested')">«Нам это не интересно»</button>
+                    <button class="btn" onclick="goTo('step-sec-mail')">«Отправьте на почту»</button>
+                </div>
+            </div>
+
+            <div id="step-sec-reason" class="step" data-progress="2">
+                <span class="badge badge-sec">Фильтр секретаря</span>
+                <h2>«По какому вопросу?»</h2>
+                <div class="phrase-box">«Я звоню по поводу актуализации данных вашей компании на картах и открытия доступа к расширенной статистике поисковых запросов в вашем районе. Нужно согласовать пару моментов с руководителем. Соедините, пожалуйста».</div>
+                <button class="btn" onclick="goTo('step-lpr-welcome')">Переключает</button>
+            </div>
+
+            <div id="step-sec-not-interested" class="step" data-progress="2">
+                <span class="badge badge-sec">Обход блока</span>
+                <h2>«Нам это не интересно»</h2>
+                <div class="phrase-box">«Я вас отлично понимаю. Но я звоню не с рекламой. Мы бесплатно передаем компаниям аналитику активности пользователей прямо вокруг ваших точек. Соедините с руководителем на минутку».</div>
+                <button class="btn" onclick="goTo('step-lpr-welcome')">Переключает</button>
+            </div>
+
+            <div id="step-sec-mail" class="step" data-progress="2">
+                <span class="badge badge-sec">Фильтр секретаря</span>
+                <h2>«Отправьте на почту»</h2>
+                <div class="phrase-box">«Я обязательно отправлю. Но чтобы не слать спам, мне нужно понять, какие именно данные по вашему району подгрузить к письму. Для этого нужно задать руководителю буквально пару вопросов. Соедините, пожалуйста».</div>
+                <button class="btn" onclick="goTo('step-lpr-welcome')">Переключает</button>
+            </div>
+
+            <div id="step-lpr-welcome" class="step" data-progress="3">
+                <span class="badge badge-lpr">Этап 2: Выход на ЛПР</span>
+                <h2>Крюк ясности с руководителем</h2>
+                <div class="phrase-box lpr-border">«Здравствуйте! Меня зовут [Имя], компания 2ГИС. Мы сейчас анализируем активность пользователей в вашей сфере за прошлый месяц. Видим высокий всплеск целевого спроса на ваши услуги в вашем районе, но часть клиентов уходит к конкурентам. Хочу показать вам цифры».</div>
+
+                <div class="notebook-box" style="border-color: var(--secondary);">
+                    <div class="notebook-title" style="color: #0284c7">📝 Имя ЛПР</div>
+                    <div class="input-group">
+                        <input type="text" id="lpr-name" class="input-field" placeholder="Имя руководителя..." oninput="capitalizeInput(this); saveCurrentCall();">
+                    </div>
+                </div>
+
+                <div class="options-title">Реакция ЛПР:</div>
+                <div class="buttons-grid">
+                    <button class="btn" onclick="goTo('step-lpr-qualification')">«Да, слушаю» / «Что там у вас?»</button>
+                    <button class="btn btn-danger" onclick="goTo('step-final-close')">«У меня мало времени / Сразу к делу»</button>
+                </div>
+            </div>
+
+            <div id="step-lpr-qualification" class="step" data-progress="4">
+                <span class="badge badge-lpr">Этап 3: Разведка спроса</span>
+                <h2>Вопросы для вовлечения ЛПР</h2>
+                <div class="phrase-box lpr-border">«Чтобы я не предлагал общие шаблоны, подскажите: вы сейчас за статистикой и отзывами на картах сами следите или кто-то занимается? И какие каналы продвижения сейчас для вас ключевые?»</div>
+
+                <div class="notebook-box" style="border-color: var(--secondary);">
+                    <div class="notebook-title" style="color: #0284c7">📝 Заметки по рекламе</div>
+                    <div class="input-group">
+                        <input type="text" id="lpr-adv" class="input-field" placeholder="Где рекламируются..." oninput="saveCurrentCall()">
+                    </div>
+                </div>
+
+                <button class="btn" onclick="goTo('step-final-close')">Перейти к фиксации встречи →</button>
+            </div>
+
+            <div id="step-final-close" class="step" data-progress="5">
+                <span class="badge badge-final">Этап 4: Закрытие</span>
+                <h2>Назначение онлайн-демонстрации</h2>
+                <div class="phrase-box final-border">«Отлично! Нам понадобится буквально 10 минут. Я подготовлю карту спроса вашего района и точки роста вашей карточки. Вам как удобнее созвониться: в Zoom или прямо в Telegram с демонстрацией экрана?»</div>
+
+                <div class="notebook-box" style="border-color: var(--primary);">
+                    <div class="notebook-title" style="color: var(--primary-dark)">📅 Выбор даты и времени встречи</div>
+                    <div class="input-group">
+                        <input type="datetime-local" id="lpr-datetime" class="input-field" oninput="saveCurrentCall();">
+                    </div>
+                </div>
+
+                <button class="btn" onclick="handleFinalSave()" style="background: var(--primary); color: white; border: none; justify-content: center;">Время согласовано! Фиксируем</button>
+            </div>
+
+            <div id="step-deal" class="step" data-progress="5">
+                <span class="badge badge-final">Успех 🎉</span>
+                <h2>Договоренность закреплена</h2>
+                <div class="phrase-box final-border" style="background-color: #fdf2f8;">
+                    «Зафиксировал. <strong id="lbl-lpr-name-final">Руководитель</strong>, я забронировал это время. Прямо сейчас отправлю вам подтверждение. Всего доброго!»
+                </div>
+
+                <div class="notebook-box" style="background: #f0fdf4; border-color: #bbf7d0;">
+                    <div class="notebook-title" style="color: var(--primary-dark)">📋 Данные для копирования в CRM:</div>
+                    
+                    <div class="crm-split-container">
+                        <div class="crm-row">
+                            <div class="crm-row-info">
+                                <strong>Компания</strong>
+                                <span id="cell-comp"></span>
+                                <input type="text" id="edit-input-comp" class="input-field" style="display:none; margin-top:5px;" placeholder="Введите название компании" oninput="capitalizeInput(this)">
+                            </div>
+                            <div class="action-actions-wrap">
+                                <button class="icon-btn" id="edit-btn-comp" onclick="toggleInlineEdit('comp')">✏️</button>
+                                <button class="icon-btn" onclick="copyDirectText('cell-comp')">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crm-row">
+                            <div class="crm-row-info">
+                                <strong>Имя ЛПР</strong>
+                                <span id="cell-lpr"></span>
+                                <input type="text" id="edit-input-lpr" class="input-field" style="display:none; margin-top:5px;" placeholder="Введите имя ЛПР" oninput="capitalizeInput(this)">
+                            </div>
+                            <div class="action-actions-wrap">
+                                <button class="icon-btn" id="edit-btn-lpr" onclick="toggleInlineEdit('lpr')">✏️</button>
+                                <button class="icon-btn" onclick="copyDirectText('cell-lpr')">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crm-row">
+                            <div class="crm-row-info">
+                                <strong>Реклама / Маркеры</strong>
+                                <span id="cell-adv"></span>
+                                <input type="text" id="edit-input-adv" class="input-field" style="display:none; margin-top:5px;" placeholder="Где рекламируются">
+                            </div>
+                            <div class="action-actions-wrap">
+                                <button class="icon-btn" id="edit-btn-adv" onclick="toggleInlineEdit('adv')">✏️</button>
+                                <button class="icon-btn" onclick="copyDirectText('cell-adv')">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="crm-row">
+                            <div class="crm-row-info">
+                                <strong>Дата и время встречи</strong>
+                                <span id="cell-time"></span>
+                                <input type="text" id="edit-input-time" class="input-field" style="display:none; margin-top:5px;" placeholder="Укажите дату и время">
+                            </div>
+                            <div class="action-actions-wrap">
+                                <button class="icon-btn" id="edit-btn-time" onclick="toggleInlineEdit('time')">✏️</button>
+                                <button class="icon-btn" onclick="copyDirectText('cell-time')">📋</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label style="font-weight:700; font-size:0.8rem; color:#334155; display:block; margin-bottom:5px;">📄 Лог звонка:</label>
+                    <div class="copy-box" id="crm-text"></div>
+                    <button class="btn-copy" onclick="copyDirectText('crm-text')">Скопировать лог</button>
+                    
+                    <br><br>
+                    
+                    <label style="font-weight:700; font-size:0.8rem; color:#334155; display:block; margin-bottom:5px;">💬 Полный шаблон WhatsApp:</label>
+                    <div class="copy-box" id="wa-text"></div>
+                    <button class="btn-copy" onclick="copyDirectText('wa-text')">Скопировать Шаблон 1</button>
+                </div>
+
+                <br>
+                <button class="btn" onclick="resetAndGoToStart()" style="border-color: var(--text-muted); width: 100%; justify-content: center;">🔄 Новый звонок</button>
+            </div>
+
+        </div>
+    </div>
 
     <div class="drawer" id="drawer">
-        <div class="drawer-title">📜 База звонков (Архив)</div>
+        <div class="drawer-title">
+            <span>📜 Архив звонков</span>
+            <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+        </div>
         <div class="history-list" id="history-items-container"></div>
         <button class="btn-clear-history" onclick="clearAllHistory()">🗑️ Очистить архив</button>
     </div>
 
     <div class="fullscreen-page" id="archive-card-page">
         <div class="fullscreen-container">
-            <div style="display:flex; justify-content:between; align-items:center; margin-bottom:25px; border-bottom:2px solid #f1f5f9; padding-bottom:15px; gap: 20px;">
-                <h2 style="margin:0; color:var(--secondary); flex-grow:1;" id="archive-page-title">Карточка компании</h2>
-                <button class="btn-copy" style="background:#cbd5e1" onclick="closeArchivePage()">✕ Назад к скрипту</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f1f5f9; padding-bottom:10px;">
+                <h3 style="margin:0; color:var(--secondary); font-size:1.1rem;" id="archive-page-title">Правка карточки</h3>
             </div>
             
             <div class="crm-split-container">
@@ -302,235 +494,38 @@
                     <input type="text" id="arch-field-adv" class="input-field">
                 </div>
                 <div class="input-group">
-                    <label>Дата и время встречи (Текст)</label>
+                    <label>Дата и время встречи</label>
                     <input type="text" id="arch-field-time" class="input-field">
                 </div>
             </div>
             
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn" id="arch-btn-save" style="background:var(--primary); color:white; border:none; width:100%; justify-content:center;">💾 Сохранить изменения в архиве</button>
-                <button class="btn" id="arch-btn-delete" style="background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; width:200px; justify-content:center;">🗑️ Удалить</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        
-        <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-line" id="p-line"></div>
-                <div class="progress-step active" id="ps1" onclick="jumpToStep('step-start')">1</div>
-                <div class="progress-step" id="ps2" onclick="jumpToStep('step-sec-reason')">2</div>
-                <div class="progress-step" id="ps3" onclick="jumpToStep('step-lpr-welcome')">3</div>
-                <div class="progress-step" id="ps4" onclick="jumpToStep('step-lpr-qualification')">4</div>
-                <div class="progress-step" id="ps5" onclick="jumpToStep('step-final-close')">5</div>
-            </div>
-            <div class="progress-labels">
-                <div class="progress-label active" id="pl1" onclick="jumpToStep('step-start')">Приветствие</div>
-                <div class="progress-label" id="pl2" onclick="jumpToStep('step-sec-reason')">Обход блока</div>
-                <div class="progress-label" id="pl3" onclick="jumpToStep('step-lpr-welcome')">Контакт с ЛПР</div>
-                <div class="progress-label" id="pl4" onclick="jumpToStep('step-lpr-qualification')">Разведка</div>
-                <div class="progress-label" id="pl5" onclick="jumpToStep('step-final-close')">Закрытие</div>
-            </div>
-        </div>
-
-        <div class="script-container">
-
-            <div id="step-start" class="step active" data-progress="1">
-                <span class="badge badge-start">Этап 1: Приветствие</span>
-                <h2>Выход на контакт (Секретарь)</h2>
-                
-                <div class="notebook-box" style="border-color: var(--primary);">
-                    <div class="notebook-title" style="color: var(--primary-dark)">🏢 До звонка: Зафиксируйте компанию</div>
-                    <div class="input-group">
-                        <label>Название компании / Сфера деятельности</label>
-                        <input type="text" id="comp-name" class="input-field" placeholder="Например: СТО Горизонт" oninput="capitalizeInput(this); saveCurrentCall();">
-                    </div>
-                </div>
-
-                <div class="phrase-box">«Добрый день! Компания 2ГИС, меня зовут [Ваше Имя]. Соедините, пожалуйста, с руководителем компании или ответственным за привлечение клиентов / отделом маркетинга».</div>
-                <div class="options-title">Что отвечает секретарь?</div>
-                <div class="buttons-grid">
-                    <button class="btn" onclick="goTo('step-lpr-welcome')">Сразу переключает / Называет имя ЛПР</button>
-                    <button class="btn" onclick="goTo('step-sec-reason')">«По какому вопросу?» / «Что вы хотите?»</button>
-                    <button class="btn" onclick="goTo('step-sec-not-interested')">«Нам это не интересно» (Блок)</button>
-                    <button class="btn" onclick="goTo('step-sec-mail')">«Отправьте предложение на почту»</button>
-                </div>
-            </div>
-
-            <div id="step-sec-reason" class="step" data-progress="2">
-                <button class="btn-back" onclick="goTo('step-start')">← Назад</button>
-                <span class="badge badge-sec">Фильтр секретаря</span>
-                <h2>Вопрос: «Что конкретно вы предлагаете?»</h2>
-                <div class="phrase-box">«Я звоню по поводу актуализации данных вашей компании на картах и открытия доступа к расширенной статистике поисковых запросов в вашем районе. Мне нужно согласовать пару технических моментов с руководителем. Как я могу к нему обращаться?»</div>
-                <button class="btn" onclick="goTo('step-lpr-welcome')">Окей, переключаю</button>
-            </div>
-
-            <div id="step-sec-not-interested" class="step" data-progress="2">
-                <button class="btn-back" onclick="goTo('step-start')">← Назад</button>
-                <span class="badge badge-sec">Обход блока</span>
-                <h2>Отказ: «Нам это не интересно»</h2>
-                <div class="phrase-box">«Я вас отлично понимаю. Но дело в том, что я звоню не с коммерческим предложением и не с рекламой. Мы бесплатно передаем компаниям аналитику активности пользователей прямо вокруг ваших точек. Чтобы руководитель был в курсе, соедините с ним на минутку, пожалуйста».</div>
-                <button class="btn" onclick="goTo('step-lpr-welcome')">Ладно, переключаю</button>
-            </div>
-
-            <div id="step-sec-mail" class="step" data-progress="2">
-                <button class="btn-back" onclick="goTo('step-start')">← Назад</button>
-                <span class="badge badge-sec">Фильтр секретаря</span>
-                <h2>Требование: «Отправьте на почту»</h2>
-                <div class="phrase-box">«Я обязательно отправлю. Но чтобы не слать спам, мне нужно понять, какие именно данные по району подгрузить к письму. Для этого нужно задать руководителю буквально два вопроса. Соедините на минуту, пожалуйста».</div>
-                <button class="btn" onclick="goTo('step-lpr-welcome')">Ладно, минуту</button>
-            </div>
-
-            <div id="step-lpr-welcome" class="step" data-progress="3">
-                <button class="btn-back" onclick="goTo('step-start')">← Назад к началу</button>
-                <span class="badge badge-lpr">Этап 2: Выход на ЛПР</span>
-                <h2>Крюк ясности с руководителем</h2>
-                <div class="phrase-box lpr-border">«Здравствуйте! Меня зовут [Ваше Имя], компания 2ГИС. Мы сейчас анализируем активность пользователей в вашей сфере за прошлый месяц. Видим высокий всплеск целевого спроса на [вашу услугу] в вашем районе, но часть клиентов уходит к конкурентам. Хочу показать вам эти цифры и предложить готовое решение».</div>
-
-                <div class="notebook-box" style="border-color: var(--secondary);">
-                    <div class="notebook-title" style="color: #0284c7">📝 Блокнот звонка</div>
-                    <div class="input-group">
-                        <label>Имя руководителя (ЛПР)</label>
-                        <input type="text" id="lpr-name" class="input-field" placeholder="Например: Иван Иванович" oninput="capitalizeInput(this); saveCurrentCall();">
-                    </div>
-                </div>
-
-                <div class="options-title">Реакция ЛПР:</div>
-                <div class="buttons-grid">
-                    <button class="btn" onclick="goTo('step-lpr-qualification')">«Да, слушаю» / «Что там у вас?»</button>
-                    <button class="btn btn-danger" onclick="goTo('step-final-close')">«У меня нет времени / Сразу к делу»</button>
-                </div>
-            </div>
-
-            <div id="step-lpr-qualification" class="step" data-progress="4">
-                <button class="btn-back" onclick="goTo('step-lpr-welcome')">← К началу ЛПР</button>
-                <span class="badge badge-lpr">Этап 3: Разведка спроса</span>
-                <h2>Вопросы для вовлечения ЛПР</h2>
-                <div class="phrase-box lpr-border">«Чтобы я не предлагал вам общие шаблоны, подскажите: вы сейчас за статистикой и отзывами на картах сами следите или кто-то занимается? И какие каналы привлечения клиентов сейчас для вас ключевые — контекст, соцсети или сарафанное радио?»</div>
-
-                <div class="notebook-box" style="border-color: var(--secondary);">
-                    <div class="notebook-title" style="color: #0284c7">📝 Блокнот звонка</div>
-                    <div class="input-group">
-                        <label>Где сейчас рекламируются / Важные примечания</label>
-                        <input type="text" id="lpr-adv" class="input-field" placeholder="Например: Яндекс.Директ, соцсети" oninput="saveCurrentCall()">
-                    </div>
-                </div>
-
-                <button class="btn" onclick="goTo('step-final-close')">Перейти к закрытию встречи</button>
-            </div>
-
-            <div id="step-final-close" class="step" data-progress="5">
-                <button class="btn-back" onclick="goTo('step-lpr-welcome')">← Назад</button>
-                <span class="badge badge-final">Этап 4: Закрытие</span>
-                <h2>Назначение встречи через Онлайн-демонстрацию</h2>
-                <div class="phrase-box final-border">«Отлично! Нам понадобится буквально 10–12 минут. Я подготовлю карту спроса вашего района, данные по конкурентам и точки роста вашей карточки. Вам как удобнее созвониться: в Zoom или прямо в Telegram с демонстрацией экрана?»</div>
-
-                <div class="notebook-box" style="border-color: var(--primary);">
-                    <div class="notebook-title" style="color: var(--primary-dark)">📅 Фиксация даты встречи</div>
-                    <div class="input-group">
-                        <label>Выберите дату и время созвона:</label>
-                        <input type="datetime-local" id="lpr-datetime" class="input-field" oninput="saveCurrentCall();">
-                    </div>
-                </div>
-
-                <div class="buttons-grid">
-                    <button class="btn" onclick="handleFinalSave()" style="background: var(--primary); color: white; border: none; justify-content: center;">Время согласовано! Фиксируем</button>
-                </div>
-            </div>
-
-            <div id="step-deal" class="step" data-progress="5">
-                <span class="badge badge-final">Успех 🎉</span>
-                <h2>Закрепление договоренности</h2>
-                <div class="phrase-box final-border" style="background-color: #fdf2f8;">
-                    «Зафиксировал. <strong id="lbl-lpr-name-final">[Имя ЛПР]</strong>, я забронировал это время под нас. Прямо сейчас отправлю вам в WhatsApp подтверждение встречи. Всего доброго!»
-                </div>
-
-                <div class="notebook-box" style="background: #f0fdf4; border-color: #bbf7d0;">
-                    <div class="notebook-title" style="color: var(--primary-dark)">📋 Данные по ячейкам для CRM-системы:</div>
-                    
-                    <div class="crm-split-container">
-                        <div class="crm-row">
-                            <div class="crm-row-info">
-                                <strong>Компания</strong>
-                                <span id="cell-comp"></span>
-                                <input type="text" id="edit-input-comp" class="input-field" style="display:none; margin-top:5px;" oninput="capitalizeInput(this)">
-                            </div>
-                            <div class="action-actions-wrap">
-                                <button class="icon-btn" id="edit-btn-comp" onclick="toggleInlineEdit('comp')">✏️</button>
-                                <button class="icon-btn" onclick="copyDirectText('cell-comp')">📋</button>
-                            </div>
-                        </div>
-                        
-                        <div class="crm-row">
-                            <div class="crm-row-info">
-                                <strong>Имя ЛПР</strong>
-                                <span id="cell-lpr"></span>
-                                <input type="text" id="edit-input-lpr" class="input-field" style="display:none; margin-top:5px;" oninput="capitalizeInput(this)">
-                            </div>
-                            <div class="action-actions-wrap">
-                                <button class="icon-btn" id="edit-btn-lpr" onclick="toggleInlineEdit('lpr')">✏️</button>
-                                <button class="icon-btn" onclick="copyDirectText('cell-lpr')">📋</button>
-                            </div>
-                        </div>
-                        
-                        <div class="crm-row">
-                            <div class="crm-row-info">
-                                <strong>Текущая реклама / Маркеры</strong>
-                                <span id="cell-adv"></span>
-                                <input type="text" id="edit-input-adv" class="input-field" style="display:none; margin-top:5px;">
-                            </div>
-                            <div class="action-actions-wrap">
-                                <button class="icon-btn" id="edit-btn-adv" onclick="toggleInlineEdit('adv')">✏️</button>
-                                <button class="icon-btn" onclick="copyDirectText('cell-adv')">📋</button>
-                            </div>
-                        </div>
-                        
-                        <div class="crm-row">
-                            <div class="crm-row-info">
-                                <strong>Дата и время встречи</strong>
-                                <span id="cell-time"></span>
-                                <input type="text" id="edit-input-time" class="input-field" style="display:none; margin-top:5px;">
-                            </div>
-                            <div class="action-actions-wrap">
-                                <button class="icon-btn" id="edit-btn-time" onclick="toggleInlineEdit('time')">✏️</button>
-                                <button class="icon-btn" onclick="copyDirectText('cell-time')">📋</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <label style="font-weight:700; font-size:0.85rem; color:#334155; display:block; margin-bottom:5px;">📄 Весь лог звонка одним текстом:</label>
-                    <div class="copy-box" id="crm-text"></div>
-                    <button class="btn-copy" onclick="copyDirectText('crm-text')">Скопировать лог</button>
-                    
-                    <br><br>
-                    
-                    <label style="font-weight:700; font-size:0.85rem; color:#334155; display:block; margin-bottom:5px;">💬 Вариант 1: Полное подтверждение встречи:</label>
-                    <div class="copy-box" id="wa-text"></div>
-                    <button class="btn-copy" onclick="copyDirectText('wa-text')">Скопировать Шаблон 1</button>
-                    
-                    <br><br>
-                    
-                    <label style="font-weight:700; font-size:0.85rem; color:#334155; display:block; margin-bottom:5px;">⚡ Вариант 2: Готовое экспресс-сообщение (быстрое):</label>
-                    <div class="copy-box" id="wa-express-text"></div>
-                    <button class="btn-copy" onclick="copyDirectText('wa-express-text')">Скопировать Шаблон 2</button>
-                </div>
-
-                <br>
-                <button class="btn" onclick="resetAndGoToStart()" style="border-color: var(--text-muted)">🔄 Начать новый звонок</button>
-            </div>
-
+            <button class="btn" id="arch-btn-save" style="background:var(--primary); color:white; border:none; width:100%; justify-content:center; margin-top:15px;">💾 Сохранить изменения</button>
         </div>
     </div>
 
     <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        let navigationHistory = [];
+
         window.onload = function() {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand(); // Растягивает мини-апп на максимум вверх
-            document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color || '#f4f6f9');
             loadCurrentCallFields();
             renderHistory();
+            
+            if (tg.themeParams.bg_color) {
+                document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color);
+            }
+
+            tg.BackButton.onClick(function() {
+                if (document.getElementById('archive-card-page').style.display === 'block') {
+                    closeArchivePage();
+                } else if (navigationHistory.length > 0) {
+                    const previousStep = navigationHistory.pop();
+                    executeGoTo(previousStep, false);
+                }
+            });
         };
 
         function toggleDrawer() {
@@ -549,7 +544,7 @@
         }
 
         function formatDateTime(rawDateTime) {
-            if(!rawDateTime) return '[Не согласовано]';
+            if(!rawDateTime) return '';
             const dt = new Date(rawDateTime);
             if(isNaN(dt.getTime())) return rawDateTime; 
             return dt.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -569,47 +564,70 @@
             if(localStorage.getItem('cur_lpr_datetime')) document.getElementById('lpr-datetime').value = localStorage.getItem('cur_lpr_datetime');
         }
 
-        function buildTexts() {
-            const comp = document.getElementById('comp-name').value || '[Не указана]';
-            const name = document.getElementById('lpr-name').value || '[Не указано]';
-            const adv = document.getElementById('lpr-adv').value || '[Не указано]';
-            
-            let rawTime = document.getElementById('lpr-datetime').value;
-            const datetime = rawTime ? formatDateTime(rawTime) : (document.getElementById('cell-time').innerText || '[Не согласовано]');
-
-            document.getElementById('cell-comp').innerText = comp;
-            document.getElementById('cell-lpr').innerText = name;
-            document.getElementById('cell-adv').innerText = adv;
-            document.getElementById('cell-time').innerText = datetime;
-
-            document.getElementById('crm-text').innerText = `РЕЗУЛЬТАТ ХОЛОДНОГО ЗВОНКА (2ГИС)\n• Компания: ${comp}\n• Имя ЛПР: ${name}\n• Текущая реклама / Маркеры: ${adv}\n• Статус: Назначена онлайн-демонстрация экрана\n• Дата/Время созвона: ${datetime}`;
-            document.getElementById('wa-text').innerText = `${name}, здравствуйте! Это менеджер компании 2ГИС. Подтверждаю нашу встречу в онлайн-формате по поводу аудита поисковых запросов в вашем районе.\n\n📅 Время встречи: ${datetime}\n🔗 Ссылку на демонстрацию экрана отправлю в этот чат за 10 минут до начала. До связи!`;
-            document.getElementById('wa-express-text').innerText = `Приветствую, ${name}! Зафиксировал наш созвон по поводу интерактивной аналитики карты 2ГИС.\n\n⏱️ Встречаемся онлайн: ${datetime}\nСсылка придет сюда же незадолго до начала. Хорошего дня!`;
+        function setCellText(elementId, textValue, placeholderText) {
+            const el = document.getElementById(elementId);
+            if (!textValue || textValue.trim() === '') {
+                el.innerText = placeholderText;
+                el.classList.add('placeholder-active');
+            } else {
+                el.innerText = textValue;
+                el.classList.remove('placeholder-active');
+            }
         }
 
-        // РЕДАКТИРОВАНИЕ ПРЯМО ВНУТРИ ФИНАЛЬНОЙ СТРАНИЦЫ
+        function buildTexts() {
+            const comp = document.getElementById('comp-name').value || '';
+            const name = document.getElementById('lpr-name').value || '';
+            const adv = document.getElementById('lpr-adv').value || '';
+            
+            let rawTime = document.getElementById('lpr-datetime').value;
+            const datetime = rawTime ? formatDateTime(rawTime) : (document.getElementById('edit-input-time').value || '');
+
+            // Установка умного отображения ячеек
+            setCellText('cell-comp', comp, 'Не указана');
+            setCellText('cell-lpr', name, 'Не указано');
+            setCellText('cell-adv', adv, 'Не указано');
+            setCellText('cell-time', datetime, 'Не согласовано');
+
+            // Тексты логов
+            const logComp = comp || '[Не указана]';
+            const logName = name || '[Не указано]';
+            const logAdv = adv || '[Не указано]';
+            const logTime = datetime || '[Не согласовано]';
+
+            document.getElementById('crm-text').innerText = `РЕЗУЛЬТАТ ХОЛОДНОГО ЗВОНКА (2ГИС)\n• Компания: ${logComp}\n• Имя ЛПР: ${logName}\n• Текущая реклама: ${logAdv}\n• Статус: Назначена демонстрация\n• Время созвона: ${logTime}`;
+            document.getElementById('wa-text').innerText = `${name || 'Здравствуйте'}, это менеджер 2ГИС. Подтверждаю нашу встречу в онлайн-формате.\n\n📅 Время встречи: ${logTime}\n🔗 Ссылку на экран отправлю в этот чат за 10 минут до начала. До связи!`;
+        }
+
         function toggleInlineEdit(field) {
             const span = document.getElementById(`cell-${field}`);
             const input = document.getElementById(`edit-input-${field}`);
             const btn = document.getElementById(`edit-btn-${field}`);
 
             if (input.style.display === 'none') {
-                input.value = span.innerText;
+                // Если текст в span является плейсхолдером, открываем полностью ПУСТУЮ ячейку
+                if (span.classList.contains('placeholder-active')) {
+                    input.value = '';
+                } else {
+                    input.value = span.innerText;
+                }
                 span.style.display = 'none';
                 input.style.display = 'block';
                 btn.innerText = '💾';
                 btn.classList.add('save-active');
                 input.focus();
             } else {
-                span.innerText = input.value;
-                
-                // Переносим изменения в основные скрытые поля, чтобы тексты пересобрались синхронно
+                // Сохранение изменений
                 if(field === 'comp') document.getElementById('comp-name').value = input.value;
                 if(field === 'lpr') {
                     document.getElementById('lpr-name').value = input.value;
-                    document.getElementById('lbl-lpr-name-final').innerText = input.value;
+                    document.getElementById('lbl-lpr-name-final').innerText = input.value || 'Руководитель';
                 }
                 if(field === 'adv') document.getElementById('lpr-adv').value = input.value;
+                if(field === 'time') {
+                    // Если правили текстовое поле вручную, сохраняем его
+                    span.innerText = input.value;
+                }
                 
                 saveCurrentCall();
                 buildTexts();
@@ -618,29 +636,30 @@
                 span.style.display = 'block';
                 btn.innerText = '✏️';
                 btn.classList.remove('save-active');
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             }
         }
 
         function handleFinalSave() {
             saveCurrentCall();
             
-            const comp = document.getElementById('comp-name').value || 'Новая компания';
-            const name = document.getElementById('lpr-name').value || 'Руководитель';
-            const adv = document.getElementById('lpr-adv').value || 'Нет данных';
+            const comp = document.getElementById('comp-name').value || '';
+            const name = document.getElementById('lpr-name').value || '';
+            const adv = document.getElementById('lpr-adv').value || '';
             const rawTime = document.getElementById('lpr-datetime').value;
             const datetime = formatDateTime(rawTime);
             
-            document.getElementById('lbl-lpr-name-final').innerText = name;
-
+            document.getElementById('lbl-lpr-name-final').innerText = name || 'Руководитель';
             buildTexts();
 
             let history = JSON.parse(localStorage.getItem('calls_history')) || [];
             const newCall = {
                 id: Date.now(),
-                company: comp,
-                lpr: name,
-                adv: adv,
-                time: datetime,
+                company: comp || 'Новая компания',
+                lpr: name || 'Не указано',
+                adv: adv || 'Нет данных',
+                time: datetime || 'Несогласовано',
                 dateStamp: new Date().toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
             };
             history.unshift(newCall);
@@ -648,6 +667,8 @@
 
             renderHistory();
             goTo('step-deal');
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
 
         function renderHistory() {
@@ -672,47 +693,37 @@
             });
         }
 
-        // ОТКРЫТИЕ КАРТОЧКИ КЛИЕНТА НА ОТДЕЛЬНОЙ СТРАНИЦЕ (OVERLAY) С РЕДАКТИРОВАНИЕМ
         function openArchivePage(call) {
             const page = document.getElementById('archive-card-page');
             page.style.display = 'block';
-            
-            document.getElementById('archive-page-title').innerText = `Просмотр и правка: ${call.company}`;
-            document.getElementById('arch-field-comp').value = call.company;
-            document.getElementById('arch-field-lpr').value = call.lpr;
-            document.getElementById('arch-field-adv').value = call.adv;
-            document.getElementById('arch-field-time').value = call.time;
+            tg.BackButton.show();
 
-            // Кнопка сохранения правок внутри архива
+            document.getElementById('archive-field-comp').value = call.company === 'Новая компания' ? '' : call.company;
+            document.getElementById('archive-field-lpr').value = call.lpr === 'Не указано' ? '' : call.lpr;
+            document.getElementById('archive-field-adv').value = call.adv === 'Нет данных' ? '' : call.adv;
+            document.getElementById('archive-field-time').value = call.time === 'Несогласовано' ? '' : call.time;
+
             document.getElementById('arch-btn-save').onclick = function() {
                 let history = JSON.parse(localStorage.getItem('calls_history')) || [];
                 const idx = history.findIndex(item => item.id === call.id);
                 if(idx !== -1) {
-                    history[idx].company = document.getElementById('arch-field-comp').value;
-                    history[idx].lpr = document.getElementById('arch-field-lpr').value;
-                    history[idx].adv = document.getElementById('arch-field-adv').value;
-                    history[idx].time = document.getElementById('arch-field-time').value;
-                    localStorage.setItem('calls_history', JSON.stringify(history));
-                    renderHistory();
-                    alert('Изменения сохранены в базе архива!');
-                    closeArchivePage();
-                }
-            };
-
-            // Кнопка удаления из отдельной страницы
-            document.getElementById('arch-btn-delete').onclick = function() {
-                if(confirm('Удалить эту карточку из архива?')) {
-                    let history = JSON.parse(localStorage.getItem('calls_history')) || [];
-                    history = history.filter(item => item.id !== call.id);
+                    history[idx].company = document.getElementById('archive-field-comp').value || 'Новая компания';
+                    history[idx].lpr = document.getElementById('archive-field-lpr').value || 'Не указано';
+                    history[idx].adv = document.getElementById('archive-field-adv').value || 'Нет данных';
+                    history[idx].time = document.getElementById('archive-field-time').value || 'Несогласовано';
                     localStorage.setItem('calls_history', JSON.stringify(history));
                     renderHistory();
                     closeArchivePage();
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 }
             };
         }
 
         function closeArchivePage() {
             document.getElementById('archive-card-page').style.display = 'none';
+            if (navigationHistory.length === 0) {
+                tg.BackButton.hide();
+            }
         }
 
         function clearAllHistory() {
@@ -723,10 +734,16 @@
         }
 
         function copyDirectText(elementId) {
-            const text = document.getElementById(elementId).innerText;
+            const el = document.getElementById(elementId);
+            // Если копируем заглушку, копируем пустую строку
+            const text = el.classList.contains('placeholder-active') ? '' : el.innerText;
+            
             navigator.clipboard.writeText(text).then(() => {
-                alert('Успешно скопировано в буфер!');
-            }).catch(() => alert('Ошибка копирования.'));
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                tg.showAlert('Скопировано в буфер!');
+            }).catch(() => {
+                alert('Ошибка копирования');
+            });
         }
 
         function resetAndGoToStart() {
@@ -740,7 +757,9 @@
             document.getElementById('lpr-adv').value = '';
             document.getElementById('lpr-datetime').value = '';
             
-            goTo('step-start');
+            navigationHistory = [];
+            tg.BackButton.hide();
+            executeGoTo('step-start', false);
         }
 
         function jumpToStep(stepId) {
@@ -749,6 +768,14 @@
         }
 
         function goTo(stepId) {
+            const currentActiveStep = document.querySelector('.step.active');
+            if (currentActiveStep && currentActiveStep.id !== stepId) {
+                navigationHistory.push(currentActiveStep.id);
+            }
+            executeGoTo(stepId, true);
+        }
+
+        function executeGoTo(stepId, pushState = true) {
             const steps = document.querySelectorAll('.step');
             steps.forEach(step => step.classList.remove('active'));
             
@@ -758,6 +785,12 @@
                 const progressLevel = parseInt(targetStep.getAttribute('data-progress')) || 1;
                 updateProgressBar(progressLevel);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            if (navigationHistory.length > 0) {
+                tg.BackButton.show();
+            } else {
+                tg.BackButton.hide();
             }
         }
 
@@ -771,13 +804,13 @@
                 
                 if (i < level) {
                     stepCircle.className = 'progress-step completed';
-                    stepLabel.className = 'progress-label';
+                    if(stepLabel) stepLabel.className = 'progress-label';
                 } else if (i === level) {
                     stepCircle.className = 'progress-step active';
-                    stepLabel.className = 'progress-label active';
+                    if(stepLabel) stepLabel.className = 'progress-label active';
                 } else {
                     stepCircle.className = 'progress-step';
-                    stepLabel.className = 'progress-label';
+                    if(stepLabel) stepLabel.className = 'progress-label';
                 }
             }
         }
